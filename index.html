@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Cron-калькулятор для бота смены доменов</title>
+<style>
+  :root {
+    --bg: #f4f4f7;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b6b80;
+    --accent: #3b6ef6;
+    --accent-text: #ffffff;
+    --border: #e2e2ea;
+    --code-bg: #f0f1f6;
+    --ok: #1c8a4b;
+    --ok-bg: #e6f7ec;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14141f;
+      --card: #1e1e2e;
+      --text: #f0f0f5;
+      --muted: #9a9ab0;
+      --accent: #6f9bff;
+      --accent-text: #0d0d16;
+      --border: #33334a;
+      --code-bg: #26263a;
+      --ok: #4fd888;
+      --ok-bg: #16301f;
+      color-scheme: dark;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding-inline: 16px;
+    padding-block: 32px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .subtitle { color: var(--muted); font-size: 14px; margin: 0 0 28px; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 22px;
+    margin-bottom: 20px;
+  }
+  .card h2 { font-size: 15px; margin: 0 0 14px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  .presets { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 4px; }
+  .preset-btn {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 999px;
+    padding: 7px 14px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .preset-btn:hover { border-color: var(--accent); }
+  .fields { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 16px; }
+  @media (max-width: 560px) { .fields { grid-template-columns: repeat(2, 1fr); } }
+  .field label {
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .field input {
+    width: 100%;
+    padding: 9px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 14px;
+  }
+  .field input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  .cron-line {
+    margin-top: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .cron-code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 16px;
+    background: var(--code-bg);
+    border-radius: 8px;
+    padding: 8px 12px;
+    flex: 1 1 auto;
+    min-width: 180px;
+  }
+  button.copy {
+    background: var(--accent);
+    color: var(--accent-text);
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  button.copy:active { opacity: .8; }
+  .human {
+    margin-top: 10px;
+    font-size: 15px;
+  }
+  .error { color: #d8434b; font-size: 13px; margin-top: 8px; }
+  .runs {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+  .runs h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 0 0 8px; }
+  .runs ol { margin: 0; padding-left: 20px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+  .runs li { margin-bottom: 3px; }
+  .bot-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  @media (max-width: 560px) { .bot-fields { grid-template-columns: 1fr; } }
+  .bot-fields .field { grid-column: span 1; }
+  .bot-fields .field.wide { grid-column: 1 / -1; }
+  .bot-fields input { font-family: inherit; }
+  .command-box {
+    margin-top: 14px;
+    background: var(--code-bg);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 13px;
+    word-break: break-all;
+  }
+  .hint { font-size: 13px; color: var(--muted); margin-top: 10px; }
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--ok-bg);
+    color: var(--ok);
+    border: 1px solid var(--ok);
+    border-radius: 999px;
+    padding: 8px 18px;
+    font-size: 14px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s, transform .2s;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  footer { text-align: center; color: var(--muted); font-size: 12px; margin-top: 28px; }
+  footer a { color: inherit; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>⏰ Cron-калькулятор</h1>
+  <p class="subtitle">Собери расписание для бота смены доменов — визуально, без ошибок в формате.</p>
+
+  <div class="card">
+    <h2>Быстрые варианты</h2>
+    <div class="presets" id="presets"></div>
+  </div>
+
+  <div class="card">
+    <h2>Или задай вручную</h2>
+    <div class="fields">
+      <div class="field"><label>минута (0–59)</label><input id="f-min" value="0" inputmode="text"></div>
+      <div class="field"><label>час (0–23)</label><input id="f-hour" value="6" inputmode="text"></div>
+      <div class="field"><label>день месяца</label><input id="f-dom" value="*" inputmode="text"></div>
+      <div class="field"><label>месяц</label><input id="f-mon" value="*" inputmode="text"></div>
+      <div class="field"><label>день недели</label><input id="f-dow" value="*" inputmode="text"></div>
+    </div>
+    <div class="hint">Можно: <code>*</code> (любое), <code>5</code> (конкретное), <code>1,3,5</code> (список), <code>1-5</code> (диапазон), <code>*/15</code> (каждые N). День недели: 0=вс … 6=сб.</div>
+
+    <div class="cron-line">
+      <div class="cron-code" id="cron-out">0 6 * * *</div>
+      <button class="copy" data-copy="#cron-out">Скопировать</button>
+    </div>
+    <div class="human" id="human-out"></div>
+    <div class="error" id="error-out"></div>
+
+    <div class="runs" id="runs-block">
+      <h3>Ближайшие срабатывания</h3>
+      <ol id="runs-list"></ol>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Готовая команда для бота</h2>
+    <div class="bot-fields">
+      <div class="field"><label>тенант</label><input id="b-tenant" value="mon_ru_nutra"></div>
+      <div class="field"><label>текущий домен</label><input id="b-old" value="globalnewswire.rest"></div>
+      <div class="field wide"><label>новый домен (можно несколько через запятую)</label><input id="b-new" value="new-domain.com"></div>
+    </div>
+    <div class="command-box" id="command-out"></div>
+    <div class="cron-line" style="margin-top:10px">
+      <button class="copy" data-copy="#command-out">Скопировать команду</button>
+    </div>
+    <div class="hint">Вставьте эту команду в чат с ботом (Matrix) — она создаст расписание.</div>
+  </div>
+
+  <footer>
+    Расписания в боте — повторяющиеся: срабатывают на каждый тик, пока не удалены или выключены (<code>!schedule_remove</code> / <code>!schedule_disable</code>).
+  </footer>
+</div>
+
+<div class="toast" id="toast">Скопировано</div>
+
+<script>
+'use strict';
+
+const MONTHS = ["", "январь", "февраль", "март", "апрель", "май", "июнь", "июль", "август", "сентябрь", "октябрь", "ноябрь", "декабрь"];
+const WEEKDAYS = ["воскресенье", "понедельник", "вторник", "среда", "четверг", "пятница", "суббота"];
+const WEEKDAYS_SHORT = ["вс", "пн", "вт", "ср", "чт", "пт", "сб"];
+
+const PRESETS = [
+  { label: "Каждый день в 06:00", cron: "0 6 * * *" },
+  { label: "Каждый день в 00:00", cron: "0 0 * * *" },
+  { label: "Каждые 6 часов", cron: "0 */6 * * *" },
+  { label: "Каждые 12 часов", cron: "0 */12 * * *" },
+  { label: "Раз в час", cron: "0 * * * *" },
+  { label: "Каждый понедельник в 09:00", cron: "0 9 * * 1" },
+  { label: "Каждую пятницу в 18:00", cron: "0 18 * * 5" },
+  { label: "1-го числа каждого месяца", cron: "0 0 1 * *" },
+];
+
+const els = {
+  min: document.getElementById('f-min'),
+  hour: document.getElementById('f-hour'),
+  dom: document.getElementById('f-dom'),
+  mon: document.getElementById('f-mon'),
+  dow: document.getElementById('f-dow'),
+  cronOut: document.getElementById('cron-out'),
+  humanOut: document.getElementById('human-out'),
+  errorOut: document.getElementById('error-out'),
+  runsBlock: document.getElementById('runs-block'),
+  runsList: document.getElementById('runs-list'),
+  presets: document.getElementById('presets'),
+  bTenant: document.getElementById('b-tenant'),
+  bOld: document.getElementById('b-old'),
+  bNew: document.getElementById('b-new'),
+  commandOut: document.getElementById('command-out'),
+  toast: document.getElementById('toast'),
+};
+
+function parseField(raw, min, max, names) {
+  // returns a Set of matched integers, or throws with a human error
+  const set = new Set();
+  const parts = raw.split(',').map(s => s.trim()).filter(Boolean);
+  if (parts.length === 0) throw new Error('поле пустое');
+  for (const part of parts) {
+    let body = part, step = 1;
+    const stepMatch = body.match(/^(.*)\/(\d+)$/);
+    if (stepMatch) { body = stepMatch[1]; step = parseInt(stepMatch[2], 10); if (!step) throw new Error(`шаг 0 в "${part}"`); }
+    let lo = min, hi = max;
+    if (body !== '*') {
+      const rangeMatch = body.match(/^(\d+|[a-zA-Zа-яА-Я]+)-(\d+|[a-zA-Zа-яА-Я]+)$/);
+      if (rangeMatch) {
+        lo = resolveName(rangeMatch[1], names, min, max);
+        hi = resolveName(rangeMatch[2], names, min, max);
+      } else {
+        lo = hi = resolveName(body, names, min, max);
+      }
+    }
+    if (lo < min || hi > max || lo > hi) throw new Error(`значение вне диапазона в "${part}" (${min}-${max})`);
+    for (let v = lo; v <= hi; v += step) set.add(v);
+  }
+  return set;
+}
+
+function resolveName(token, names, min, max) {
+  if (/^\d+$/.test(token)) {
+    const n = parseInt(token, 10);
+    return n;
+  }
+  if (names) {
+    const idx = names.findIndex(n => n && n.toLowerCase().startsWith(token.toLowerCase()));
+    if (idx >= 0) return idx;
+  }
+  throw new Error(`не понимаю значение "${token}"`);
+}
+
+function buildCron() {
+  return [els.min.value.trim(), els.hour.value.trim(), els.dom.value.trim(), els.mon.value.trim(), els.dow.value.trim()].join(' ');
+}
+
+function humanReadable(minSet, hourSet, domRaw, monRaw, dowRaw) {
+  const parts = [];
+
+  // time part
+  if (minSet.size === 1 && hourSet.size === 1) {
+    const m = [...minSet][0], h = [...hourSet][0];
+    parts.push(`в ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`);
+  } else if (hourSet.size === 24 && minSet.size < 60) {
+    const mins = [...minSet].sort((a,b)=>a-b);
+    parts.push(`в минуту ${mins.join(', ')} каждого часа`);
+  } else {
+    parts.push(`в выбранные часы/минуты (${hourSet.size} час(ов) × ${minSet.size} минут(ы) в каждом)`);
+  }
+
+  const domAny = domRaw === '*';
+  const monAny = monRaw === '*';
+  const dowAny = dowRaw === '*';
+
+  if (domAny && monAny && dowAny) {
+    parts.push('каждый день');
+  } else {
+    if (!dowAny) {
+      const dowSet = parseField(dowRaw, 0, 6, WEEKDAYS);
+      const names = [...dowSet].sort((a,b)=>a-b).map(d => WEEKDAYS[d]);
+      parts.push('по ' + names.join(', '));
+    }
+    if (!domAny) {
+      const domSet = parseField(domRaw, 1, 31, null);
+      parts.push((domSet.size === 1 ? 'числа ' : 'числа: ') + [...domSet].sort((a,b)=>a-b).join(', '));
+    }
+    if (!monAny) {
+      const monSet = parseField(monRaw, 1, 12, MONTHS);
+      parts.push('в ' + [...monSet].sort((a,b)=>a-b).map(m => MONTHS[m]).join(', '));
+    }
+  }
+
+  return parts.join(' ').replace(/^./, c => c.toUpperCase());
+}
+
+function nextRuns(minSet, hourSet, domSet, monSet, dowSet, domRaw, dowRaw, count) {
+  // standard cron semantics: if BOTH dom and dow are restricted (not '*'),
+  // a date matches if it satisfies EITHER of them (not both)
+  const domRestricted = domRaw !== '*';
+  const dowRestricted = dowRaw !== '*';
+  const results = [];
+  let d = new Date();
+  d.setSeconds(0, 0);
+  d.setMinutes(d.getMinutes() + 1);
+  const limit = 366 * 24 * 60; // safety cap: at most ~1 year of minutes scanned
+  let steps = 0;
+  while (results.length < count && steps < limit) {
+    steps++;
+    const dow = d.getDay();
+    const domOk = domSet.has(d.getDate());
+    const dowOk = dowSet.has(dow);
+    const dateOk = domRestricted && dowRestricted ? (domOk || dowOk) : (domOk && dowOk);
+    if (monSet.has(d.getMonth() + 1) && dateOk && hourSet.has(d.getHours()) && minSet.has(d.getMinutes())) {
+      results.push(new Date(d));
+      d.setMinutes(d.getMinutes() + 1);
+    } else {
+      d.setMinutes(d.getMinutes() + 1);
+    }
+  }
+  return results;
+}
+
+function fmtDate(d) {
+  const days = ["вс","пн","вт","ср","чт","пт","сб"];
+  const pad = n => String(n).padStart(2, '0');
+  return `${pad(d.getDate())}.${pad(d.getMonth()+1)}.${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())} (${days[d.getDay()]})`;
+}
+
+function render() {
+  const cron = buildCron();
+  els.cronOut.textContent = cron;
+
+  const domRaw = els.dom.value.trim();
+  const monRaw = els.mon.value.trim();
+  const dowRaw = els.dow.value.trim();
+
+  try {
+    const minSet = parseField(els.min.value.trim(), 0, 59, null);
+    const hourSet = parseField(els.hour.value.trim(), 0, 23, null);
+    const domSet = parseField(domRaw, 1, 31, null);
+    const monSet = parseField(monRaw, 1, 12, MONTHS);
+    const dowSet = parseField(dowRaw, 0, 6, WEEKDAYS);
+
+    els.errorOut.textContent = '';
+    els.humanOut.textContent = humanReadable(minSet, hourSet, domRaw, monRaw, dowRaw);
+
+    const runs = nextRuns(minSet, hourSet, domSet, monSet, dowSet, domRaw, dowRaw, 5);
+    els.runsList.innerHTML = '';
+    if (runs.length === 0) {
+      els.runsList.innerHTML = '<li>не удалось найти ближайшие срабатывания (слишком редкое расписание?)</li>';
+    } else {
+      for (const r of runs) {
+        const li = document.createElement('li');
+        li.textContent = fmtDate(r);
+        els.runsList.appendChild(li);
+      }
+    }
+    els.runsBlock.style.display = '';
+  } catch (e) {
+    els.errorOut.textContent = '⚠️ ' + e.message;
+    els.humanOut.textContent = '';
+    els.runsBlock.style.display = 'none';
+  }
+
+  renderCommand(cron);
+}
+
+function renderCommand(cron) {
+  const tenant = els.bTenant.value.trim() || '<тенант>';
+  const oldD = els.bOld.value.trim() || '<текущий_домен>';
+  const newD = els.bNew.value.trim() || '<новый_домен>';
+  els.commandOut.textContent = `!schedule_add ${tenant} ${oldD} ${newD} ${cron}`;
+}
+
+function showToast() {
+  els.toast.classList.add('show');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => els.toast.classList.remove('show'), 1400);
+}
+
+document.querySelectorAll('button.copy').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const sel = btn.getAttribute('data-copy');
+    const text = document.querySelector(sel).textContent;
+    try {
+      await navigator.clipboard.writeText(text);
+      showToast();
+    } catch (e) {
+      const range = document.createRange();
+      range.selectNodeContents(document.querySelector(sel));
+      const sel2 = window.getSelection();
+      sel2.removeAllRanges();
+      sel2.addRange(range);
+    }
+  });
+});
+
+for (const p of PRESETS) {
+  const btn = document.createElement('button');
+  btn.className = 'preset-btn';
+  btn.textContent = p.label;
+  btn.addEventListener('click', () => {
+    const [m, h, dom, mon, dow] = p.cron.split(' ');
+    els.min.value = m; els.hour.value = h; els.dom.value = dom; els.mon.value = mon; els.dow.value = dow;
+    render();
+  });
+  els.presets.appendChild(btn);
+}
+
+[els.min, els.hour, els.dom, els.mon, els.dow, els.bTenant, els.bOld, els.bNew].forEach(el => {
+  el.addEventListener('input', render);
+});
+
+render();
+</script>
+</body>
+</html>
