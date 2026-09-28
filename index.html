@@ -54,17 +54,6 @@
     margin-bottom: 20px;
   }
   .card h2 { font-size: 15px; margin: 0 0 14px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
-  .presets { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 4px; }
-  .preset-btn {
-    background: var(--code-bg);
-    border: 1px solid var(--border);
-    color: var(--text);
-    border-radius: 999px;
-    padding: 7px 14px;
-    font-size: 13px;
-    cursor: pointer;
-  }
-  .preset-btn:hover { border-color: var(--accent); }
   .fields { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 16px; }
   @media (max-width: 560px) { .fields { grid-template-columns: repeat(2, 1fr); } }
   .field label {
@@ -162,15 +151,9 @@
 <body>
 <div class="wrap">
   <h1>⏰ Cron-калькулятор</h1>
-  <p class="subtitle">Собери расписание для бота смены доменов — визуально, без ошибок в формате.</p>
 
   <div class="card">
-    <h2>Быстрые варианты</h2>
-    <div class="presets" id="presets"></div>
-  </div>
-
-  <div class="card">
-    <h2>Или задай вручную</h2>
+    <h2>Задай расписание</h2>
     <div class="fields">
       <div class="field"><label>минута (0–59)</label><input id="f-min" value="0" inputmode="text"></div>
       <div class="field"><label>час (0–23)</label><input id="f-hour" value="6" inputmode="text"></div>
@@ -204,12 +187,8 @@
     <div class="cron-line" style="margin-top:10px">
       <button class="copy" data-copy="#command-out">Скопировать команду</button>
     </div>
-    <div class="hint">Вставьте эту команду в чат с ботом (Matrix) — она создаст расписание.</div>
+    <div class="hint">Вставьте эту команду в чат с ботом (Element) — она создаст расписание.</div>
   </div>
-
-  <footer>
-    Расписания в боте — повторяющиеся: срабатывают на каждый тик, пока не удалены или выключены (<code>!schedule_remove</code> / <code>!schedule_disable</code>).
-  </footer>
 </div>
 
 <div class="toast" id="toast">Скопировано</div>
@@ -220,17 +199,6 @@
 const MONTHS = ["", "январь", "февраль", "март", "апрель", "май", "июнь", "июль", "август", "сентябрь", "октябрь", "ноябрь", "декабрь"];
 const WEEKDAYS = ["воскресенье", "понедельник", "вторник", "среда", "четверг", "пятница", "суббота"];
 const WEEKDAYS_SHORT = ["вс", "пн", "вт", "ср", "чт", "пт", "сб"];
-
-const PRESETS = [
-  { label: "Каждый день в 06:00", cron: "0 6 * * *" },
-  { label: "Каждый день в 00:00", cron: "0 0 * * *" },
-  { label: "Каждые 6 часов", cron: "0 */6 * * *" },
-  { label: "Каждые 12 часов", cron: "0 */12 * * *" },
-  { label: "Раз в час", cron: "0 * * * *" },
-  { label: "Каждый понедельник в 09:00", cron: "0 9 * * 1" },
-  { label: "Каждую пятницу в 18:00", cron: "0 18 * * 5" },
-  { label: "1-го числа каждого месяца", cron: "0 0 1 * *" },
-];
 
 const els = {
   min: document.getElementById('f-min'),
@@ -243,7 +211,6 @@ const els = {
   errorOut: document.getElementById('error-out'),
   runsBlock: document.getElementById('runs-block'),
   runsList: document.getElementById('runs-list'),
-  presets: document.getElementById('presets'),
   bTenant: document.getElementById('b-tenant'),
   bOld: document.getElementById('b-old'),
   bNew: document.getElementById('b-new'),
@@ -432,18 +399,6 @@ document.querySelectorAll('button.copy').forEach(btn => {
     }
   });
 });
-
-for (const p of PRESETS) {
-  const btn = document.createElement('button');
-  btn.className = 'preset-btn';
-  btn.textContent = p.label;
-  btn.addEventListener('click', () => {
-    const [m, h, dom, mon, dow] = p.cron.split(' ');
-    els.min.value = m; els.hour.value = h; els.dom.value = dom; els.mon.value = mon; els.dow.value = dow;
-    render();
-  });
-  els.presets.appendChild(btn);
-}
 
 [els.min, els.hour, els.dom, els.mon, els.dow, els.bTenant, els.bOld, els.bNew].forEach(el => {
   el.addEventListener('input', render);
