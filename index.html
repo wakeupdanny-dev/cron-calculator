@@ -198,6 +198,17 @@
 
 const MONTHS = ["", "январь", "февраль", "март", "апрель", "май", "июнь", "июль", "август", "сентябрь", "октябрь", "ноябрь", "декабрь"];
 const WEEKDAYS = ["воскресенье", "понедельник", "вторник", "среда", "четверг", "пятница", "суббота"];
+const MONTHS_PREP = ["", "январе", "феврале", "марте", "апреле", "мае", "июне", "июле", "августе", "сентябре", "октябре", "ноябре", "декабре"];
+const WEEKDAYS_DAT = ["воскресеньям", "понедельникам", "вторникам", "средам", "четвергам", "пятницам", "субботам"];
+
+function plural(n, one, few, many) {
+  const a = Math.abs(n) % 100, b = a % 10;
+  if (a > 10 && a < 20) return many;
+  if (b > 1 && b < 5) return few;
+  if (b === 1) return one;
+  return many;
+}
+
 const WEEKDAYS_SHORT = ["вс", "пн", "вт", "ср", "чт", "пт", "сб"];
 
 const els = {
@@ -268,9 +279,9 @@ function humanReadable(minSet, hourSet, domRaw, monRaw, dowRaw) {
     parts.push(`в ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`);
   } else if (hourSet.size === 24 && minSet.size < 60) {
     const mins = [...minSet].sort((a,b)=>a-b);
-    parts.push(`в минуту ${mins.join(', ')} каждого часа`);
+    parts.push(`в ${plural(mins.length, 'минуту', 'минуты', 'минуты')} ${mins.join(', ')} каждого часа`);
   } else {
-    parts.push(`в выбранные часы/минуты (${hourSet.size} час(ов) × ${minSet.size} минут(ы) в каждом)`);
+    parts.push(`в выбранное время (${hourSet.size} ${plural(hourSet.size, 'час', 'часа', 'часов')} × ${minSet.size} ${plural(minSet.size, 'минута', 'минуты', 'минут')} в каждом)`);
   }
 
   const domAny = domRaw === '*';
@@ -282,7 +293,7 @@ function humanReadable(minSet, hourSet, domRaw, monRaw, dowRaw) {
   } else {
     if (!dowAny) {
       const dowSet = parseField(dowRaw, 0, 6, WEEKDAYS);
-      const names = [...dowSet].sort((a,b)=>a-b).map(d => WEEKDAYS[d]);
+      const names = [...dowSet].sort((a,b)=>a-b).map(d => WEEKDAYS_DAT[d]);
       parts.push('по ' + names.join(', '));
     }
     if (!domAny) {
@@ -291,7 +302,7 @@ function humanReadable(minSet, hourSet, domRaw, monRaw, dowRaw) {
     }
     if (!monAny) {
       const monSet = parseField(monRaw, 1, 12, MONTHS);
-      parts.push('в ' + [...monSet].sort((a,b)=>a-b).map(m => MONTHS[m]).join(', '));
+      parts.push('в ' + [...monSet].sort((a,b)=>a-b).map(m => MONTHS_PREP[m]).join(', '));
     }
   }
 
