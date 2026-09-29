@@ -11,11 +11,14 @@
     --text: #1a1a2e;
     --muted: #6b6b80;
     --accent: #3b6ef6;
+    --accent-soft: #e8eefe;
     --accent-text: #ffffff;
     --border: #e2e2ea;
     --code-bg: #f0f1f6;
     --ok: #1c8a4b;
     --ok-bg: #e6f7ec;
+    --err: #d8434b;
+    --err-bg: #fdecee;
     color-scheme: light;
   }
   @media (prefers-color-scheme: dark) {
@@ -25,11 +28,14 @@
       --text: #f0f0f5;
       --muted: #9a9ab0;
       --accent: #6f9bff;
+      --accent-soft: #22304f;
       --accent-text: #0d0d16;
       --border: #33334a;
       --code-bg: #26263a;
       --ok: #4fd888;
       --ok-bg: #16301f;
+      --err: #ff7b83;
+      --err-bg: #3a1c20;
       color-scheme: dark;
     }
   }
@@ -45,7 +51,7 @@
   }
   .wrap { max-width: 760px; margin: 0 auto; }
   h1 { font-size: 22px; margin: 0 0 4px; }
-  .subtitle { color: var(--muted); font-size: 14px; margin: 0 0 28px; }
+  .subtitle { color: var(--muted); font-size: 14px; margin: 0 0 24px; }
   .card {
     background: var(--card);
     border: 1px solid var(--border);
@@ -53,9 +59,40 @@
     padding: 20px 22px;
     margin-bottom: 20px;
   }
-  .card h2 { font-size: 15px; margin: 0 0 14px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
-  .fields { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 16px; }
-  @media (max-width: 560px) { .fields { grid-template-columns: repeat(2, 1fr); } }
+  .card h2 {
+    font-size: 16px;
+    margin: 0 0 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .step {
+    flex: none;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--accent-text);
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    border-radius: 999px;
+    padding: 7px 14px;
+    font-size: 14px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .chip:hover { border-color: var(--accent); }
+  .chip.active { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+  .options { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end; }
+  .options .field { min-width: 120px; }
   .field label {
     display: block;
     font-size: 12px;
@@ -69,21 +106,40 @@
     border-radius: 8px;
     background: var(--bg);
     color: var(--text);
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    font-size: 14px;
+    font-size: 15px;
+    font-family: inherit;
   }
   .field input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
-  .cron-line {
-    margin-top: 18px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
+  .field input.invalid { border-color: var(--err); background: var(--err-bg); }
+  .field .fmsg { color: var(--err); font-size: 12px; margin-top: 3px; min-height: 0; }
+  .days { display: flex; gap: 6px; flex-wrap: wrap; }
+  .day {
+    width: 42px;
+    padding: 8px 0;
+    text-align: center;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-family: inherit;
   }
+  .day.active { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+  .hidden { display: none !important; }
+
+  .result {
+    margin-top: 20px;
+    padding: 16px 18px;
+    background: var(--accent-soft);
+    border-radius: 12px;
+  }
+  .human { font-size: 20px; font-weight: 600; line-height: 1.3; min-height: 26px; }
+  .cron-line { margin-top: 12px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
   .cron-code {
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    font-size: 16px;
-    background: var(--code-bg);
+    font-size: 15px;
+    background: var(--card);
     border-radius: 8px;
     padding: 8px 12px;
     flex: 1 1 auto;
@@ -94,32 +150,33 @@
     color: var(--accent-text);
     border: none;
     border-radius: 8px;
-    padding: 8px 16px;
+    padding: 9px 16px;
     font-size: 14px;
     cursor: pointer;
     white-space: nowrap;
+    font-family: inherit;
   }
   button.copy:active { opacity: .8; }
-  .human {
-    margin-top: 10px;
-    font-size: 15px;
-  }
-  .error { color: #d8434b; font-size: 13px; margin-top: 8px; }
-  .runs {
-    margin-top: 14px;
-    padding-top: 14px;
-    border-top: 1px solid var(--border);
-  }
+  .error { color: var(--err); font-size: 14px; margin-top: 10px; }
+  .runs { margin-top: 16px; }
   .runs h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 0 0 8px; }
-  .runs ol { margin: 0; padding-left: 20px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
-  .runs li { margin-bottom: 3px; }
+  .runs ul { margin: 0; padding: 0; list-style: none; }
+  .runs li {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .runs li:last-child { border-bottom: none; }
+  .runs .rel { color: var(--muted); text-align: right; }
+
+
   .bot-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   @media (max-width: 560px) { .bot-fields { grid-template-columns: 1fr; } }
-  .bot-fields .field { grid-column: span 1; }
   .bot-fields .field.wide { grid-column: 1 / -1; }
-  .bot-fields input { font-family: inherit; }
   .command-box {
-    margin-top: 14px;
     background: var(--code-bg);
     border-radius: 8px;
     padding: 12px 14px;
@@ -144,47 +201,87 @@
     transition: opacity .2s, transform .2s;
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-  footer { text-align: center; color: var(--muted); font-size: 12px; margin-top: 28px; }
-  footer a { color: inherit; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>⏰ Cron-калькулятор</h1>
+  <p class="subtitle">Выберите, как часто менять домен — получите готовую команду для бота.</p>
 
   <div class="card">
-    <h2>Задай расписание</h2>
-    <div class="fields">
-      <div class="field"><label>минута (0–59)</label><input id="f-min" value="0" inputmode="text"></div>
-      <div class="field"><label>час (0–23)</label><input id="f-hour" value="6" inputmode="text"></div>
-      <div class="field"><label>день месяца</label><input id="f-dom" value="*" inputmode="text"></div>
-      <div class="field"><label>месяц</label><input id="f-mon" value="*" inputmode="text"></div>
-      <div class="field"><label>день недели</label><input id="f-dow" value="*" inputmode="text"></div>
-    </div>
-    <div class="hint">Можно: <code>*</code> (любое), <code>5</code> (конкретное), <code>1,3,5</code> (список), <code>1-5</code> (диапазон), <code>*/15</code> (каждые N). День недели: 0=вс … 6=сб.</div>
+    <h2><span class="step">1</span> Когда менять домен</h2>
 
-    <div class="cron-line">
-      <div class="cron-code" id="cron-out">0 6 * * *</div>
-      <button class="copy" data-copy="#cron-out">Скопировать</button>
+    <div class="chips" id="modes">
+      <button class="chip" data-mode="daily">Каждый день</button>
+      <button class="chip" data-mode="weekdays">По будням</button>
+      <button class="chip" data-mode="weekend">По выходным</button>
+      <button class="chip" data-mode="weekly">По дням недели</button>
+      <button class="chip" data-mode="monthly">Раз в месяц</button>
+      <button class="chip" data-mode="hours">Каждые N часов</button>
+      <button class="chip" data-mode="minutes">Каждые N минут</button>
     </div>
-    <div class="human" id="human-out"></div>
-    <div class="error" id="error-out"></div>
 
-    <div class="runs" id="runs-block">
-      <h3>Ближайшие срабатывания</h3>
-      <ol id="runs-list"></ol>
+    <div class="options">
+      <div class="field" data-for="daily weekdays weekend weekly monthly">
+        <label>Время</label>
+        <input type="time" id="o-time" value="06:00">
+      </div>
+      <div class="field hidden" data-for="weekly">
+        <label>Дни недели</label>
+        <div class="days" id="o-days">
+          <button class="day" data-d="1">Пн</button>
+          <button class="day" data-d="2">Вт</button>
+          <button class="day" data-d="3">Ср</button>
+          <button class="day" data-d="4">Чт</button>
+          <button class="day" data-d="5">Пт</button>
+          <button class="day" data-d="6">Сб</button>
+          <button class="day" data-d="0">Вс</button>
+        </div>
+      </div>
+      <div class="field hidden" data-for="monthly">
+        <label>Число месяца (1–31)</label>
+        <input type="number" id="o-dom" min="1" max="31" value="1">
+      </div>
+      <div class="field hidden" data-for="hours minutes">
+        <label id="o-n-label">Каждые (часов)</label>
+        <input type="number" id="o-n" min="1" max="59" value="6">
+      </div>
     </div>
+
+    <div class="result">
+      <div class="human" id="human-out"></div>
+      <div class="cron-line">
+        <div class="cron-code" id="cron-out">0 6 * * *</div>
+        <button class="copy" data-copy="#cron-out">Скопировать</button>
+      </div>
+      <div class="error" id="error-out"></div>
+
+      <div class="runs" id="runs-block">
+        <h3>Ближайшие срабатывания</h3>
+        <ul id="runs-list"></ul>
+      </div>
+    </div>
+
+    <input type="hidden" id="f-min" value="0">
+    <input type="hidden" id="f-hour" value="6">
+    <input type="hidden" id="f-dom" value="*">
+    <input type="hidden" id="f-mon" value="*">
+    <input type="hidden" id="f-dow" value="*">
   </div>
 
   <div class="card">
-    <h2>Готовая команда для бота</h2>
+    <h2><span class="step">2</span> Что менять</h2>
     <div class="bot-fields">
       <div class="field"><label>тенант</label><input id="b-tenant" value="mon_ru_nutra"></div>
       <div class="field"><label>текущий домен</label><input id="b-old" value="globalnewswire.rest"></div>
       <div class="field wide"><label>новый домен (можно несколько через запятую)</label><input id="b-new" value="new-domain.com"></div>
     </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="step">3</span> Команда для бота</h2>
     <div class="command-box" id="command-out"></div>
-    <div class="cron-line" style="margin-top:10px">
+    <div class="cron-line" style="margin-top:12px">
       <button class="copy" data-copy="#command-out">Скопировать команду</button>
     </div>
     <div class="hint">Вставьте эту команду в чат с ботом (Element) — она создаст расписание.</div>
@@ -197,8 +294,8 @@
 'use strict';
 
 const MONTHS = ["", "январь", "февраль", "март", "апрель", "май", "июнь", "июль", "август", "сентябрь", "октябрь", "ноябрь", "декабрь"];
-const WEEKDAYS = ["воскресенье", "понедельник", "вторник", "среда", "четверг", "пятница", "суббота"];
 const MONTHS_PREP = ["", "январе", "феврале", "марте", "апреле", "мае", "июне", "июле", "августе", "сентябре", "октябре", "ноябре", "декабре"];
+const WEEKDAYS = ["воскресенье", "понедельник", "вторник", "среда", "четверг", "пятница", "суббота"];
 const WEEKDAYS_DAT = ["воскресеньям", "понедельникам", "вторникам", "средам", "четвергам", "пятницам", "субботам"];
 
 function plural(n, one, few, many) {
@@ -208,8 +305,6 @@ function plural(n, one, few, many) {
   if (b === 1) return one;
   return many;
 }
-
-const WEEKDAYS_SHORT = ["вс", "пн", "вт", "ср", "чт", "пт", "сб"];
 
 const els = {
   min: document.getElementById('f-min'),
@@ -227,10 +322,15 @@ const els = {
   bNew: document.getElementById('b-new'),
   commandOut: document.getElementById('command-out'),
   toast: document.getElementById('toast'),
+  time: document.getElementById('o-time'),
+  odom: document.getElementById('o-dom'),
+  n: document.getElementById('o-n'),
+  nLabel: document.getElementById('o-n-label'),
 };
 
+const state = { mode: 'daily', days: new Set([1]) };
+
 function parseField(raw, min, max, names) {
-  // returns a Set of matched integers, or throws with a human error
   const set = new Set();
   const parts = raw.split(',').map(s => s.trim()).filter(Boolean);
   if (parts.length === 0) throw new Error('поле пустое');
@@ -242,10 +342,10 @@ function parseField(raw, min, max, names) {
     if (body !== '*') {
       const rangeMatch = body.match(/^(\d+|[a-zA-Zа-яА-Я]+)-(\d+|[a-zA-Zа-яА-Я]+)$/);
       if (rangeMatch) {
-        lo = resolveName(rangeMatch[1], names, min, max);
-        hi = resolveName(rangeMatch[2], names, min, max);
+        lo = resolveName(rangeMatch[1], names);
+        hi = resolveName(rangeMatch[2], names);
       } else {
-        lo = hi = resolveName(body, names, min, max);
+        lo = hi = resolveName(body, names);
       }
     }
     if (lo < min || hi > max || lo > hi) throw new Error(`значение вне диапазона в "${part}" (${min}-${max})`);
@@ -254,11 +354,8 @@ function parseField(raw, min, max, names) {
   return set;
 }
 
-function resolveName(token, names, min, max) {
-  if (/^\d+$/.test(token)) {
-    const n = parseInt(token, 10);
-    return n;
-  }
+function resolveName(token, names) {
+  if (/^\d+$/.test(token)) return parseInt(token, 10);
   if (names) {
     const idx = names.findIndex(n => n && n.toLowerCase().startsWith(token.toLowerCase()));
     if (idx >= 0) return idx;
@@ -270,11 +367,27 @@ function buildCron() {
   return [els.min.value.trim(), els.hour.value.trim(), els.dom.value.trim(), els.mon.value.trim(), els.dow.value.trim()].join(' ');
 }
 
-function humanReadable(minSet, hourSet, domRaw, monRaw, dowRaw) {
-  const parts = [];
+function stepOf(raw) {
+  const m = raw.match(/^\*\/(\d+)$/);
+  return m ? parseInt(m[1], 10) : null;
+}
 
-  // time part
-  if (minSet.size === 1 && hourSet.size === 1) {
+function humanReadable(minSet, hourSet, minRaw, hourRaw, domRaw, monRaw, dowRaw) {
+  const parts = [];
+  let interval = false;
+
+  const minStep = stepOf(minRaw);
+  const hourStep = stepOf(hourRaw);
+
+  if (minStep && hourRaw === '*') {
+    interval = true;
+    parts.push(minStep === 1 ? 'каждую минуту' : `каждые ${minStep} ${plural(minStep, 'минуту', 'минуты', 'минут')}`);
+  } else if (hourStep && minSet.size === 1) {
+    interval = true;
+    const m = [...minSet][0];
+    const base = hourStep === 1 ? 'каждый час' : `каждые ${hourStep} ${plural(hourStep, 'час', 'часа', 'часов')}`;
+    parts.push(m === 0 ? base : `${base}, на ${m}-й минуте`);
+  } else if (minSet.size === 1 && hourSet.size === 1) {
     const m = [...minSet][0], h = [...hourSet][0];
     parts.push(`в ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`);
   } else if (hourSet.size === 24 && minSet.size < 60) {
@@ -289,16 +402,18 @@ function humanReadable(minSet, hourSet, domRaw, monRaw, dowRaw) {
   const dowAny = dowRaw === '*';
 
   if (domAny && monAny && dowAny) {
-    parts.push('каждый день');
+    if (!interval) parts.push('каждый день');
   } else {
     if (!dowAny) {
       const dowSet = parseField(dowRaw, 0, 6, WEEKDAYS);
-      const names = [...dowSet].sort((a,b)=>a-b).map(d => WEEKDAYS_DAT[d]);
-      parts.push('по ' + names.join(', '));
+      const key = [...dowSet].sort((a,b)=>a-b).join(',');
+      if (key === '1,2,3,4,5') parts.push('по будням');
+      else if (key === '0,6') parts.push('по выходным');
+      else parts.push('по ' + [...dowSet].sort((a,b)=>a-b).map(d => WEEKDAYS_DAT[d]).join(', '));
     }
     if (!domAny) {
       const domSet = parseField(domRaw, 1, 31, null);
-      parts.push((domSet.size === 1 ? 'числа ' : 'числа: ') + [...domSet].sort((a,b)=>a-b).join(', '));
+      parts.push('каждого месяца, ' + [...domSet].sort((a,b)=>a-b).join(', ') + '-го числа');
     }
     if (!monAny) {
       const monSet = parseField(monRaw, 1, 12, MONTHS);
@@ -310,15 +425,13 @@ function humanReadable(minSet, hourSet, domRaw, monRaw, dowRaw) {
 }
 
 function nextRuns(minSet, hourSet, domSet, monSet, dowSet, domRaw, dowRaw, count) {
-  // standard cron semantics: if BOTH dom and dow are restricted (not '*'),
-  // a date matches if it satisfies EITHER of them (not both)
   const domRestricted = domRaw !== '*';
   const dowRestricted = dowRaw !== '*';
   const results = [];
   let d = new Date();
   d.setSeconds(0, 0);
   d.setMinutes(d.getMinutes() + 1);
-  const limit = 366 * 24 * 60; // safety cap: at most ~1 year of minutes scanned
+  const limit = 366 * 24 * 60;
   let steps = 0;
   while (results.length < count && steps < limit) {
     steps++;
@@ -328,10 +441,8 @@ function nextRuns(minSet, hourSet, domSet, monSet, dowSet, domRaw, dowRaw, count
     const dateOk = domRestricted && dowRestricted ? (domOk || dowOk) : (domOk && dowOk);
     if (monSet.has(d.getMonth() + 1) && dateOk && hourSet.has(d.getHours()) && minSet.has(d.getMinutes())) {
       results.push(new Date(d));
-      d.setMinutes(d.getMinutes() + 1);
-    } else {
-      d.setMinutes(d.getMinutes() + 1);
     }
+    d.setMinutes(d.getMinutes() + 1);
   }
   return results;
 }
@@ -342,23 +453,62 @@ function fmtDate(d) {
   return `${pad(d.getDate())}.${pad(d.getMonth()+1)}.${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())} (${days[d.getDay()]})`;
 }
 
+function fmtRel(d) {
+  const mins = Math.max(1, Math.round((d.getTime() - Date.now()) / 60000));
+  const days = Math.floor(mins / 1440);
+  const hours = Math.floor((mins % 1440) / 60);
+  const m = mins % 60;
+  const out = [];
+  if (days) out.push(`${days} ${plural(days, 'день', 'дня', 'дней')}`);
+  if (hours) out.push(`${hours} ${plural(hours, 'час', 'часа', 'часов')}`);
+  if (m && !days) out.push(`${m} ${plural(m, 'минуту', 'минуты', 'минут')}`);
+  return 'через ' + out.join(' ');
+}
+
+function setFieldError(input, msg) {
+  input.classList.toggle('invalid', !!msg);
+  const box = input.parentElement.querySelector('.fmsg');
+  if (box) box.textContent = msg || '';
+}
+
 function render() {
   const cron = buildCron();
   els.cronOut.textContent = cron;
 
+  const minRaw = els.min.value.trim();
+  const hourRaw = els.hour.value.trim();
   const domRaw = els.dom.value.trim();
   const monRaw = els.mon.value.trim();
   const dowRaw = els.dow.value.trim();
 
-  try {
-    const minSet = parseField(els.min.value.trim(), 0, 59, null);
-    const hourSet = parseField(els.hour.value.trim(), 0, 23, null);
-    const domSet = parseField(domRaw, 1, 31, null);
-    const monSet = parseField(monRaw, 1, 12, MONTHS);
-    const dowSet = parseField(dowRaw, 0, 6, WEEKDAYS);
+  const specs = [
+    [els.min, minRaw, 0, 59, null],
+    [els.hour, hourRaw, 0, 23, null],
+    [els.dom, domRaw, 1, 31, null],
+    [els.mon, monRaw, 1, 12, MONTHS],
+    [els.dow, dowRaw, 0, 6, WEEKDAYS],
+  ];
+  const sets = [];
+  let firstError = null;
+  for (const [input, raw, lo, hi, names] of specs) {
+    try {
+      sets.push(parseField(raw, lo, hi, names));
+      setFieldError(input, '');
+    } catch (e) {
+      sets.push(null);
+      setFieldError(input, e.message);
+      if (!firstError) firstError = e.message;
+    }
+  }
 
+  if (firstError) {
+    els.errorOut.textContent = '⚠️ ' + firstError;
+    els.humanOut.textContent = 'Проверьте значения';
+    els.runsBlock.classList.add('hidden');
+  } else {
+    const [minSet, hourSet, domSet, monSet, dowSet] = sets;
     els.errorOut.textContent = '';
-    els.humanOut.textContent = humanReadable(minSet, hourSet, domRaw, monRaw, dowRaw);
+    els.humanOut.textContent = humanReadable(minSet, hourSet, minRaw, hourRaw, domRaw, monRaw, dowRaw);
 
     const runs = nextRuns(minSet, hourSet, domSet, monSet, dowSet, domRaw, dowRaw, 5);
     els.runsList.innerHTML = '';
@@ -367,15 +517,16 @@ function render() {
     } else {
       for (const r of runs) {
         const li = document.createElement('li');
-        li.textContent = fmtDate(r);
+        const a = document.createElement('span');
+        a.textContent = fmtDate(r);
+        const b = document.createElement('span');
+        b.className = 'rel';
+        b.textContent = fmtRel(r);
+        li.append(a, b);
         els.runsList.appendChild(li);
       }
     }
-    els.runsBlock.style.display = '';
-  } catch (e) {
-    els.errorOut.textContent = '⚠️ ' + e.message;
-    els.humanOut.textContent = '';
-    els.runsBlock.style.display = 'none';
+    els.runsBlock.classList.remove('hidden');
   }
 
   renderCommand(cron);
@@ -387,6 +538,66 @@ function renderCommand(cron) {
   const newD = els.bNew.value.trim() || '<новый_домен>';
   els.commandOut.textContent = `!schedule_add ${tenant} ${oldD} ${newD} ${cron}`;
 }
+
+function clampInt(el, lo, hi, fallback) {
+  const v = parseInt(el.value, 10);
+  return Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : fallback;
+}
+
+function applyPreset() {
+  const [hh, mm] = (els.time.value || '06:00').split(':').map(Number);
+  let min = String(mm), hour = String(hh), dom = '*', dow = '*';
+  switch (state.mode) {
+    case 'weekdays': dow = '1-5'; break;
+    case 'weekend': dow = '0,6'; break;
+    case 'weekly': dow = [...state.days].sort((a,b)=>a-b).join(',') || '1'; break;
+    case 'monthly': dom = String(clampInt(els.odom, 1, 31, 1)); break;
+    case 'hours': min = '0'; hour = `*/${clampInt(els.n, 1, 23, 6)}`; break;
+    case 'minutes': min = `*/${clampInt(els.n, 1, 59, 15)}`; hour = '*'; break;
+  }
+  els.min.value = min;
+  els.hour.value = hour;
+  els.dom.value = dom;
+  els.mon.value = '*';
+  els.dow.value = dow;
+  render();
+}
+
+function syncModeUI() {
+  document.querySelectorAll('#modes .chip').forEach(c => c.classList.toggle('active', c.dataset.mode === state.mode));
+  document.querySelectorAll('.options .field[data-for]').forEach(f => {
+    f.classList.toggle('hidden', !f.dataset.for.split(' ').includes(state.mode));
+  });
+  document.querySelectorAll('#o-days .day').forEach(b => b.classList.toggle('active', state.days.has(parseInt(b.dataset.d, 10))));
+  if (state.mode === 'hours') {
+    els.nLabel.textContent = 'Каждые (часов)';
+    els.n.max = 23;
+    if (parseInt(els.n.value, 10) > 23) els.n.value = 6;
+  } else if (state.mode === 'minutes') {
+    els.nLabel.textContent = 'Каждые (минут)';
+    els.n.max = 59;
+  }
+}
+
+function setMode(mode) {
+  state.mode = mode;
+  if (mode === 'minutes' && parseInt(els.n.value, 10) === 6) els.n.value = 15;
+  syncModeUI();
+  applyPreset();
+}
+
+document.querySelectorAll('#modes .chip').forEach(c => c.addEventListener('click', () => setMode(c.dataset.mode)));
+
+document.querySelectorAll('#o-days .day').forEach(b => b.addEventListener('click', () => {
+  const d = parseInt(b.dataset.d, 10);
+  if (state.days.has(d)) { if (state.days.size > 1) state.days.delete(d); } else state.days.add(d);
+  syncModeUI();
+  applyPreset();
+}));
+
+[els.time, els.odom, els.n].forEach(el => el.addEventListener('input', applyPreset));
+
+[els.bTenant, els.bOld, els.bNew].forEach(el => el.addEventListener('input', render));
 
 function showToast() {
   els.toast.classList.add('show');
@@ -411,11 +622,8 @@ document.querySelectorAll('button.copy').forEach(btn => {
   });
 });
 
-[els.min, els.hour, els.dom, els.mon, els.dow, els.bTenant, els.bOld, els.bNew].forEach(el => {
-  el.addEventListener('input', render);
-});
-
-render();
+syncModeUI();
+applyPreset();
 </script>
 </body>
 </html>
