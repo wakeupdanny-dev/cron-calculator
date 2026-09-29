@@ -328,7 +328,7 @@ const els = {
   nLabel: document.getElementById('o-n-label'),
 };
 
-const state = { mode: 'daily', days: new Set([1]) };
+const state = { mode: 'daily', days: new Set([1]), daysTouched: false };
 
 function parseField(raw, min, max, names) {
   const set = new Set();
@@ -590,7 +590,14 @@ document.querySelectorAll('#modes .chip').forEach(c => c.addEventListener('click
 
 document.querySelectorAll('#o-days .day').forEach(b => b.addEventListener('click', () => {
   const d = parseInt(b.dataset.d, 10);
-  if (state.days.has(d)) { if (state.days.size > 1) state.days.delete(d); } else state.days.add(d);
+  if (!state.daysTouched) {
+    state.daysTouched = true;
+    state.days = new Set([d]);
+  } else if (state.days.has(d)) {
+    if (state.days.size > 1) state.days.delete(d);
+  } else {
+    state.days.add(d);
+  }
   syncModeUI();
   applyPreset();
 }));
